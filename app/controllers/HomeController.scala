@@ -2,7 +2,6 @@ package controllers
 
 import javax.inject._
 
-import com.github.nscala_time.time.Imports._
 import forms.TimeForm
 import helpers.Timer
 import org.joda.time.DateTime
@@ -10,9 +9,9 @@ import org.joda.time.format.DateTimeFormat
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.I18nSupport
+import play.api.libs.json.Json
 import play.api.mvc._
 
-import scala.concurrent.duration._
 
 @Singleton
 class HomeController @Inject()(
@@ -35,14 +34,23 @@ class HomeController @Inject()(
       _ => BadRequest(""),
       input => {
         val date = parseDate(input.time)
-        val duration = (DateTime.now() to date).millis
-        timer.next(duration.millis)
+        timer.next(date)
         Ok(views.html.index())
       }
     )
   }
 
+  def current() = Action { implicit request: Request[AnyContent] =>
+    Ok(Json.obj(
+      "is_stopped" -> timer.isStopped,
+      "current" -> timer.current
+    ))
+  }
+
   private def parseDate(date: String): DateTime = {
-    DateTime.parse(date, DateTimeFormat.forPattern("HH:mm"))
+    val d = DateTime.parse(date, DateTimeFormat.forPattern("HH:mm"))
+    DateTime.now()
+      .withHourOfDay(d.hourOfDay().get())
+      .withMinuteOfHour(d.minuteOfHour().get())
   }
 }
