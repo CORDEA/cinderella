@@ -37,7 +37,11 @@ class Timer @Inject()(system: ActorSystem) {
         if (endDate.isEmpty) {
           0
         } else {
-          (DateTime.now() to endDate.get).millis
+          if (endDate.get.isAfterNow) {
+            (DateTime.now() to endDate.get).millis
+          } else {
+            0
+          }
         }
       ).toPeriod()
     )
