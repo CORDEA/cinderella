@@ -3,5 +3,9 @@
 }
 
 .form-container {
+    margin: 16px;
+}
+
+.button {
     margin-top: 16px;
 }
